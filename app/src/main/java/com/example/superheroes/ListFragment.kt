@@ -12,10 +12,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.superheroes.data.HeroItem
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class ListFragment : Fragment() {
 
     private var onItemClick: (HeroItem) -> Unit = {}
+    private val myScope = CoroutineScope(Dispatchers.Main)
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -30,18 +35,18 @@ class ListFragment : Fragment() {
 
         val listView: RecyclerView = view.findViewById(R.id.listView)
 
-        ApiClient.client.create(ApiInterface::class.java)
-            .getHeroes()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({
-                val adapter = RecyclerViewAdapter(it, onClick = { items: HeroItem ->
-                    onItemClick(items)
-                })
+        myScope.launch {
+            val hero = ApiClient.client.create(ApiInterface::class.java)
+                .getHeroes()
+
+            val adapter = RecyclerViewAdapter(hero, onClick = { items: HeroItem ->
+                onItemClick(items)
                 listView.adapter = adapter
-            }, {
-                Toast.makeText(view.context, "Request error", Toast.LENGTH_SHORT).show()
             })
+
+        }
+
+
 
         listView.layoutManager = LinearLayoutManager(view.context)
         listView.addItemDecoration(DividerItemDecoration(view.context, DividerItemDecoration.VERTICAL))

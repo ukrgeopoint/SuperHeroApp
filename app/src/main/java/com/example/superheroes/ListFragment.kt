@@ -14,6 +14,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 class ListFragment : Fragment() {
@@ -46,6 +47,11 @@ class ListFragment : Fragment() {
 
         listView.layoutManager = LinearLayoutManager(view.context)
         listView.addItemDecoration(DividerItemDecoration(view.context, DividerItemDecoration.VERTICAL))
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        myScope.cancel()
     }
 
     fun setOnListFragmentItemClickListener(onItemClick: (HeroItem) -> Unit) {

@@ -39,14 +39,10 @@ class ListFragment : Fragment() {
             val hero = ApiClient.client.create(ApiInterface::class.java)
                 .getHeroes()
 
-            val adapter = RecyclerViewAdapter(hero, onClick = { items: HeroItem ->
+            listView.adapter = RecyclerViewAdapter(hero, onClick = { items: HeroItem ->
                 onItemClick(items)
-                listView.adapter = adapter
             })
-
         }
-
-
 
         listView.layoutManager = LinearLayoutManager(view.context)
         listView.addItemDecoration(DividerItemDecoration(view.context, DividerItemDecoration.VERTICAL))

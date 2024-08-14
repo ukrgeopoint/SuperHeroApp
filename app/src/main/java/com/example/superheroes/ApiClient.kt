@@ -8,6 +8,5 @@ object ApiClient {
     val client: Retrofit = Retrofit.Builder()
         .baseUrl("https://akabab.github.io/")
         .addConverterFactory(GsonConverterFactory.create())
-        .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
         .build()
 }

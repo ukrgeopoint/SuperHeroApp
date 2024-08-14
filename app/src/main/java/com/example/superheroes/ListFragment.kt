@@ -4,23 +4,16 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.superheroes.data.HeroItem
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
 
 class ListFragment : Fragment() {
 
     private var onItemClick: (HeroItem) -> Unit = {}
-    private val myScope = CoroutineScope(Dispatchers.Main)
 
 
     override fun onCreateView(
@@ -35,23 +28,31 @@ class ListFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val listView: RecyclerView = view.findViewById(R.id.listView)
+        val viewModel = ViewModelProvider(this).get(MyViewModel::class.java)
 
-        myScope.launch {
-            val hero = ApiClient.client.create(ApiInterface::class.java)
-                .getHeroes()
+        viewModel.getData()
 
-            listView.adapter = RecyclerViewAdapter(hero, onClick = { items: HeroItem ->
-                onItemClick(items)
-            })
+        viewModel.uiState.observe(viewLifecycleOwner) { uiState ->
+            when (uiState) {
+                is MyViewModel.UIState.Empty -> Unit
+                is MyViewModel.UIState.Result -> {
+                    listView.adapter =
+                        RecyclerViewAdapter(uiState.hero, onClick = { items: HeroItem ->
+                            onItemClick(items)
+                        })
+                }
+                is MyViewModel.UIState.Processing -> Unit
+            }
         }
+        viewModel.getData()
 
         listView.layoutManager = LinearLayoutManager(view.context)
-        listView.addItemDecoration(DividerItemDecoration(view.context, DividerItemDecoration.VERTICAL))
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        myScope.cancel()
+        listView.addItemDecoration(
+            DividerItemDecoration(
+                view.context,
+                DividerItemDecoration.VERTICAL
+            )
+        )
     }
 
     fun setOnListFragmentItemClickListener(onItemClick: (HeroItem) -> Unit) {

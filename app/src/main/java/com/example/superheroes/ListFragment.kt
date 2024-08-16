@@ -4,13 +4,16 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.superheroes.data.HeroItem
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class ListFragment : Fragment() {
 
     private var onItemClick: (HeroItem) -> Unit = {}
@@ -41,21 +44,23 @@ class ListFragment : Fragment() {
                             onItemClick(items)
                         })
                 }
-                is MyViewModel.UIState.Processing -> Unit
-            }
-        }
-        viewModel.getData()
 
-        listView.layoutManager = LinearLayoutManager(view.context)
-        listView.addItemDecoration(
-            DividerItemDecoration(
-                view.context,
-                DividerItemDecoration.VERTICAL
+                is MyViewModel.UIState.Processing -> Unit
+                is MyViewModel.UIState.Error -> Unit
+            }
+
+            listView.layoutManager = LinearLayoutManager(view.context)
+            listView.addItemDecoration(
+                DividerItemDecoration(
+                    view.context,
+                    DividerItemDecoration.VERTICAL
+                )
             )
-        )
+        }
     }
 
     fun setOnListFragmentItemClickListener(onItemClick: (HeroItem) -> Unit) {
         this.onItemClick = onItemClick
     }
+
 }
